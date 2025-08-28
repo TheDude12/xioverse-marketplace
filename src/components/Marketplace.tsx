@@ -45,6 +45,7 @@ interface Filters {
   trait: boolean;
   themes: string[];
   traits: string[];
+  traitTypes: string[]; // For filtering by trait type (Strap, Dial, Item, Hologram)
   watchStrapTheme: string[];
   watchDialTheme: string[];
   watchItemTheme: string[];
@@ -67,8 +68,8 @@ export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(0);
-  const [minRarity, setMinRarity] = useState<string>('');
-  const [maxRarity, setMaxRarity] = useState<string>('');
+  const [minRarityScore, setMinRarityScore] = useState<number>(0);
+  const [maxRarityScore, setMaxRarityScore] = useState<number>(100);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
@@ -84,6 +85,7 @@ export default function Marketplace() {
     trait: false,
     themes: [],
     traits: [],
+    traitTypes: [],
     watchStrapTheme: [],
     watchDialTheme: [],
     watchItemTheme: [],
@@ -95,11 +97,22 @@ export default function Marketplace() {
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
     rarity: false,
+    rarityScore: false,
     themes: false,
     traits: false,
+    traitTypes: false,
     watchComponents: false,
     watchTraits: false
   });
+
+  // Trait types and their themes
+  const TRAIT_TYPES = ['Strap', 'Dial', 'Item', 'Hologram'];
+  const TRAIT_THEMES = {
+    'Strap': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal'],
+    'Dial': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal'],
+    'Item': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal'],
+    'Hologram': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal']
+  };
 
   // Mock data - replace with actual Google Sheets API call
   useEffect(() => {
@@ -208,13 +221,29 @@ export default function Marketplace() {
   useEffect(() => {
     let filtered = [...assets];
 
-    // Search filter
+    // Enhanced search filter - search through multiple fields
     if (searchTerm) {
-      filtered = filtered.filter(asset =>
-        asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.traits.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(asset => {
+        // Basic fields
+        const basicMatch = asset.name.toLowerCase().includes(searchLower) ||
+                          asset.theme.toLowerCase().includes(searchLower) ||
+                          asset.traits.toLowerCase().includes(searchLower) ||
+                          asset.type.toLowerCase().includes(searchLower) ||
+                          asset.rarity.toLowerCase().includes(searchLower);
+        
+        // For watches, also search through component themes
+        if (asset.type === 'Watch') {
+          const componentMatch = TRAIT_TYPES.some(traitType => 
+            traitType.toLowerCase().includes(searchLower)
+          ) || TRAIT_THEMES['Strap'].some(theme => 
+            theme.toLowerCase().includes(searchLower)
+          );
+          return basicMatch || componentMatch;
+        }
+        
+        return basicMatch;
+      });
     }
 
     // Type filters
@@ -224,16 +253,63 @@ export default function Marketplace() {
       filtered = filtered.filter(asset => asset.type === 'Trait');
     }
 
-    // Rarity filters
-    const activeRarities = [];
-    if (filters.common) activeRarities.push('Common');
-    if (filters.rare) activeRarities.push('Rare');
-    if (filters.superrare) activeRarities.push('Super Rare');
-    if (filters.ultrarare) activeRarities.push('Ultra Rare');
-    if (filters.unique) activeRarities.push('Unique');
+    // Trait type filters (for traits)
+    if (filters.traitTypes.length > 0 && filters.trait) {
+      filtered = filtered.filter(asset => 
+        asset.type === 'Trait' && filters.traitTypes.includes(asset.traits)
+      );
+    }
 
-    if (activeRarities.length > 0) {
-      filtered = filtered.filter(asset => activeRarities.includes(asset.rarity));
+    // Theme filters
+    if (filters.themes.length > 0) {
+      filtered = filtered.filter(asset => filters.themes.includes(asset.theme));
+    }
+
+    // Watch component theme filters
+    if (filters.watch) {
+      // Rarity score range for watches
+      if (minRarityScore > 0 || maxRarityScore < 100) {
+        filtered = filtered.filter(asset => 
+          asset.type === 'Watch' && 
+          asset.rarityValue >= minRarityScore && 
+          asset.rarityValue <= maxRarityScore
+        );
+      }
+
+      // Component theme filters for watches
+      if (filters.watchStrapTheme.length > 0 || 
+          filters.watchDialTheme.length > 0 || 
+          filters.watchItemTheme.length > 0 || 
+          filters.watchHologramTheme.length > 0) {
+        filtered = filtered.filter(asset => {
+          if (asset.type !== 'Watch') return false;
+          
+          // Mock logic - in real implementation, you'd match against actual component themes
+          const hasMatchingComponent = 
+            (filters.watchStrapTheme.length === 0 || filters.watchStrapTheme.includes(asset.theme)) ||
+            (filters.watchDialTheme.length === 0 || filters.watchDialTheme.includes(asset.theme)) ||
+            (filters.watchItemTheme.length === 0 || filters.watchItemTheme.includes(asset.theme)) ||
+            (filters.watchHologramTheme.length === 0 || filters.watchHologramTheme.includes(asset.theme));
+          
+          return hasMatchingComponent;
+        });
+      }
+    }
+
+    // Rarity filters (for traits)
+    if (filters.trait) {
+      const activeRarities = [];
+      if (filters.common) activeRarities.push('Common');
+      if (filters.rare) activeRarities.push('Rare');
+      if (filters.superrare) activeRarities.push('Super Rare');
+      if (filters.ultrarare) activeRarities.push('Ultra Rare');
+      if (filters.unique) activeRarities.push('Unique');
+
+      if (activeRarities.length > 0) {
+        filtered = filtered.filter(asset => 
+          asset.type === 'Trait' && activeRarities.includes(asset.rarity)
+        );
+      }
     }
 
     // Price filters
@@ -262,10 +338,16 @@ export default function Marketplace() {
       case 'least-rare':
         filtered.sort((a, b) => a.rarityValue - b.rarityValue);
         break;
+      case 'rarity-score-high':
+        filtered.sort((a, b) => b.rarityValue - a.rarityValue);
+        break;
+      case 'rarity-score-low':
+        filtered.sort((a, b) => a.rarityValue - b.rarityValue);
+        break;
     }
 
     setFilteredAssets(filtered);
-  }, [assets, searchTerm, filters, minPrice, maxPrice]);
+  }, [assets, searchTerm, filters, minPrice, maxPrice, minRarityScore, maxRarityScore]);
 
   const toggleFilter = (filterKey: keyof Filters, value?: any) => {
     setFilters(prev => {
@@ -288,6 +370,20 @@ export default function Marketplace() {
       return {
         ...prev,
         [filterKey]: typeof prev[filterKey] === 'boolean' ? !prev[filterKey] : value
+      };
+    });
+  };
+
+  const toggleArrayFilter = (filterKey: keyof Filters, value: string) => {
+    setFilters(prev => {
+      const currentArray = prev[filterKey] as string[];
+      const newArray = currentArray.includes(value)
+        ? currentArray.filter(item => item !== value)
+        : [...currentArray, value];
+      
+      return {
+        ...prev,
+        [filterKey]: newArray
       };
     });
   };
@@ -419,20 +515,134 @@ export default function Marketplace() {
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-2 mt-2">
-                    {['common', 'rare', 'superrare', 'ultrarare', 'unique'].map((rarity) => (
-                      <div key={rarity} className="flex items-center space-x-2">
+                    {filters.trait && (
+                      <>
+                        {['common', 'rare', 'superrare', 'ultrarare', 'unique'].map((rarity) => (
+                          <div key={rarity} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={rarity}
+                              checked={filters[rarity as keyof Filters] as boolean}
+                              onCheckedChange={() => toggleFilter(rarity as keyof Filters)}
+                            />
+                            <label htmlFor={rarity} className="text-sm capitalize cursor-pointer">
+                              {rarity === 'superrare' ? 'Super Rare' : rarity === 'ultrarare' ? 'Ultra Rare' : rarity}
+                            </label>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {filters.watch && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs text-muted-foreground">RARITY SCORE RANGE</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            type="number"
+                            placeholder="Min"
+                            min="0"
+                            max="100"
+                            value={minRarityScore || ''}
+                            onChange={(e) => setMinRarityScore(Number(e.target.value))}
+                            className="bg-input text-xs"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Max"
+                            min="0"
+                            max="100"
+                            value={maxRarityScore || ''}
+                            onChange={(e) => setMaxRarityScore(Number(e.target.value))}
+                            className="bg-input text-xs"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Trait Types (for Traits) */}
+                {filters.trait && (
+                  <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full justify-between p-0">
+                        <span className="font-medium text-sm text-muted-foreground">TRAIT TYPES</span>
+                        {expandedSections.traitTypes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 mt-2">
+                      {TRAIT_TYPES.map((traitType) => (
+                        <div key={traitType} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`traitType-${traitType}`}
+                            checked={filters.traitTypes.includes(traitType)}
+                            onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
+                          />
+                          <label htmlFor={`traitType-${traitType}`} className="text-sm cursor-pointer">
+                            {traitType}
+                          </label>
+                        </div>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
+                {/* Themes */}
+                <Collapsible open={expandedSections.themes} onOpenChange={() => toggleSection('themes')}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-0">
+                      <span className="font-medium text-sm text-muted-foreground">THEMES</span>
+                      {expandedSections.themes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic'].map((theme) => (
+                      <div key={theme} className="flex items-center space-x-2">
                         <Checkbox
-                          id={rarity}
-                          checked={filters[rarity as keyof Filters] as boolean}
-                          onCheckedChange={() => toggleFilter(rarity as keyof Filters)}
+                          id={`theme-${theme}`}
+                          checked={filters.themes.includes(theme)}
+                          onCheckedChange={() => toggleArrayFilter('themes', theme)}
                         />
-                        <label htmlFor={rarity} className="text-sm capitalize cursor-pointer">
-                          {rarity === 'superrare' ? 'Super Rare' : rarity === 'ultrarare' ? 'Ultra Rare' : rarity}
+                        <label htmlFor={`theme-${theme}`} className="text-sm cursor-pointer">
+                          {theme}
                         </label>
                       </div>
                     ))}
                   </CollapsibleContent>
                 </Collapsible>
+
+                {/* Watch Component Themes */}
+                {filters.watch && (
+                  <Collapsible open={expandedSections.watchComponents} onOpenChange={() => toggleSection('watchComponents')}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full justify-between p-0">
+                        <span className="font-medium text-sm text-muted-foreground">WATCH COMPONENTS</span>
+                        {expandedSections.watchComponents ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-4 mt-2">
+                      {TRAIT_TYPES.map((componentType) => (
+                        <div key={componentType} className="space-y-2">
+                          <h4 className="text-xs font-medium text-muted-foreground">{componentType.toUpperCase()}</h4>
+                          <div className="grid grid-cols-2 gap-1">
+                            {TRAIT_THEMES[componentType as keyof typeof TRAIT_THEMES].slice(0, 6).map((theme) => (
+                              <div key={`${componentType}-${theme}`} className="flex items-center space-x-1">
+                                <Checkbox
+                                  id={`watch${componentType}-${theme}`}
+                                  checked={filters[`watch${componentType}Theme` as keyof Filters] 
+                                    ? (filters[`watch${componentType}Theme` as keyof Filters] as string[]).includes(theme)
+                                    : false}
+                                  onCheckedChange={() => toggleArrayFilter(`watch${componentType}Theme` as keyof Filters, theme)}
+                                />
+                                <label htmlFor={`watch${componentType}-${theme}`} className="text-xs cursor-pointer">
+                                  {theme}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
 
                 {/* Price Range */}
                 <div className="space-y-2">
@@ -467,6 +677,12 @@ export default function Marketplace() {
                       <SelectItem value="price-low-high">Price: Low to High</SelectItem>
                       <SelectItem value="most-rare">Most Rare</SelectItem>
                       <SelectItem value="least-rare">Least Rare</SelectItem>
+                      {filters.watch && (
+                        <>
+                          <SelectItem value="rarity-score-high">Rarity Score: High to Low</SelectItem>
+                          <SelectItem value="rarity-score-low">Rarity Score: Low to High</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
