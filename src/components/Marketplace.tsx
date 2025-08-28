@@ -102,16 +102,25 @@ export default function Marketplace() {
     traits: false,
     traitTypes: false,
     watchComponents: false,
-    watchTraits: false
+    watchTraits: false,
+    watchStrap: false,
+    watchDial: false,
+    watchItem: false,
+    watchHologram: false
   });
 
   // Trait types and their themes
   const TRAIT_TYPES = ['Strap', 'Dial', 'Item', 'Hologram'];
+  const ALL_THEMES = [
+    'Alien', 'Aquatic', 'Biohazard', 'Corrosive', 'Cyberpunk', 'Egyptian Mythology', 
+    'Greek Mythology', 'Lava', 'Medieval Age', 'Magic', 'Military', 'Norse Mythology', 
+    'Prehistory', 'Pirates', 'Renaissance', 'Robot', 'Mutant', 'Steampunk', 'Skeletal', 'Zombie'
+  ];
   const TRAIT_THEMES = {
-    'Strap': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal'],
-    'Dial': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal'],
-    'Item': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal'],
-    'Hologram': ['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic', 'Digital', 'Metallic', 'Plasma', 'Crystal']
+    'Strap': ALL_THEMES,
+    'Dial': ALL_THEMES,
+    'Item': ALL_THEMES,
+    'Hologram': ALL_THEMES
   };
 
   // Mock data - replace with actual Google Sheets API call
@@ -506,34 +515,59 @@ export default function Marketplace() {
                   </div>
                 </div>
 
-                {/* Rarity */}
-                <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-0">
-                      <span className="font-medium text-sm text-muted-foreground">RARITY</span>
-                      {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {filters.trait && (
-                      <>
-                        {['common', 'rare', 'superrare', 'ultrarare', 'unique'].map((rarity) => (
-                          <div key={rarity} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={rarity}
-                              checked={filters[rarity as keyof Filters] as boolean}
-                              onCheckedChange={() => toggleFilter(rarity as keyof Filters)}
-                            />
-                            <label htmlFor={rarity} className="text-sm capitalize cursor-pointer">
-                              {rarity === 'superrare' ? 'Super Rare' : rarity === 'ultrarare' ? 'Ultra Rare' : rarity}
-                            </label>
-                          </div>
-                        ))}
-                      </>
-                    )}
-                    {filters.watch && (
-                      <div className="space-y-2">
-                        <h4 className="text-xs text-muted-foreground">RARITY SCORE RANGE</h4>
+                {/* Conditional Filters based on selection */}
+                {/* When both watches and traits are selected, only show price and basic filters */}
+                {(!filters.watch && !filters.trait) || (filters.watch && filters.trait) ? (
+                  <>
+                    {/* Price Range */}
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={minPrice || ''}
+                          onChange={(e) => setMinPrice(Number(e.target.value))}
+                          className="bg-input"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={maxPrice || ''}
+                          onChange={(e) => setMaxPrice(Number(e.target.value))}
+                          className="bg-input"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sort */}
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
+                      <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
+                        <SelectTrigger className="bg-input">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                ) : null}
+
+                {/* Watch-specific filters */}
+                {filters.watch && !filters.trait && (
+                  <>
+                    {/* Rarity Score Range */}
+                    <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between p-0">
+                          <span className="font-medium text-sm text-muted-foreground">RARITY SCORE</span>
+                          {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-2 mt-2">
                         <div className="grid grid-cols-2 gap-2">
                           <Input
                             type="number"
@@ -554,138 +588,203 @@ export default function Marketplace() {
                             className="bg-input text-xs"
                           />
                         </div>
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
+                      </CollapsibleContent>
+                    </Collapsible>
 
-                {/* Trait Types (for Traits) */}
-                {filters.trait && (
-                  <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" className="w-full justify-between p-0">
-                        <span className="font-medium text-sm text-muted-foreground">TRAIT TYPES</span>
-                        {expandedSections.traitTypes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-2 mt-2">
-                      {TRAIT_TYPES.map((traitType) => (
-                        <div key={traitType} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`traitType-${traitType}`}
-                            checked={filters.traitTypes.includes(traitType)}
-                            onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
-                          />
-                          <label htmlFor={`traitType-${traitType}`} className="text-sm cursor-pointer">
-                            {traitType}
-                          </label>
-                        </div>
-                      ))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
-
-                {/* Themes */}
-                <Collapsible open={expandedSections.themes} onOpenChange={() => toggleSection('themes')}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-0">
-                      <span className="font-medium text-sm text-muted-foreground">THEMES</span>
-                      {expandedSections.themes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {['Cyberpunk', 'Futuristic', 'Classic', 'Neon', 'Golden', 'Holographic'].map((theme) => (
-                      <div key={theme} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`theme-${theme}`}
-                          checked={filters.themes.includes(theme)}
-                          onCheckedChange={() => toggleArrayFilter('themes', theme)}
-                        />
-                        <label htmlFor={`theme-${theme}`} className="text-sm cursor-pointer">
-                          {theme}
-                        </label>
-                      </div>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Watch Component Themes */}
-                {filters.watch && (
-                  <Collapsible open={expandedSections.watchComponents} onOpenChange={() => toggleSection('watchComponents')}>
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" className="w-full justify-between p-0">
-                        <span className="font-medium text-sm text-muted-foreground">WATCH COMPONENTS</span>
-                        {expandedSections.watchComponents ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-4 mt-2">
-                      {TRAIT_TYPES.map((componentType) => (
-                        <div key={componentType} className="space-y-2">
-                          <h4 className="text-xs font-medium text-muted-foreground">{componentType.toUpperCase()}</h4>
-                          <div className="grid grid-cols-2 gap-1">
-                            {TRAIT_THEMES[componentType as keyof typeof TRAIT_THEMES].slice(0, 6).map((theme) => (
-                              <div key={`${componentType}-${theme}`} className="flex items-center space-x-1">
-                                <Checkbox
-                                  id={`watch${componentType}-${theme}`}
-                                  checked={filters[`watch${componentType}Theme` as keyof Filters] 
-                                    ? (filters[`watch${componentType}Theme` as keyof Filters] as string[]).includes(theme)
-                                    : false}
-                                  onCheckedChange={() => toggleArrayFilter(`watch${componentType}Theme` as keyof Filters, theme)}
-                                />
-                                <label htmlFor={`watch${componentType}-${theme}`} className="text-xs cursor-pointer">
-                                  {theme}
-                                </label>
+                    {/* Watch Traits */}
+                    <Collapsible open={expandedSections.watchComponents} onOpenChange={() => toggleSection('watchComponents')}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between p-0">
+                          <span className="font-medium text-sm text-muted-foreground">WATCH TRAITS</span>
+                          {expandedSections.watchComponents ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-4 mt-2">
+                        {TRAIT_TYPES.map((componentType) => (
+                          <Collapsible key={componentType} open={expandedSections[`watch${componentType}` as keyof typeof expandedSections]} onOpenChange={() => toggleSection(`watch${componentType}` as keyof typeof expandedSections)}>
+                            <CollapsibleTrigger asChild>
+                              <Button variant="ghost" className="w-full justify-between p-0 text-xs">
+                                <span className="font-medium text-xs text-muted-foreground">{componentType.toUpperCase()}</span>
+                                {expandedSections[`watch${componentType}` as keyof typeof expandedSections] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                              </Button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-2">
+                              <div className="max-h-32 overflow-y-auto space-y-1 border border-border rounded-md p-2">
+                                {TRAIT_THEMES[componentType as keyof typeof TRAIT_THEMES].map((theme) => (
+                                  <div key={`${componentType}-${theme}`} className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id={`watch${componentType}-${theme}`}
+                                      checked={filters[`watch${componentType}Theme` as keyof Filters] 
+                                        ? (filters[`watch${componentType}Theme` as keyof Filters] as string[]).includes(theme)
+                                        : false}
+                                      onCheckedChange={() => toggleArrayFilter(`watch${componentType}Theme` as keyof Filters, theme)}
+                                    />
+                                    <label htmlFor={`watch${componentType}-${theme}`} className="text-xs cursor-pointer">
+                                      {theme}
+                                    </label>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
 
-                {/* Price Range */}
-                <div className="space-y-2">
-                  <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Min"
-                      value={minPrice || ''}
-                      onChange={(e) => setMinPrice(Number(e.target.value))}
-                      className="bg-input"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Max"
-                      value={maxPrice || ''}
-                      onChange={(e) => setMaxPrice(Number(e.target.value))}
-                      className="bg-input"
-                    />
-                  </div>
-                </div>
+                    {/* Price Range */}
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={minPrice || ''}
+                          onChange={(e) => setMinPrice(Number(e.target.value))}
+                          className="bg-input"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={maxPrice || ''}
+                          onChange={(e) => setMaxPrice(Number(e.target.value))}
+                          className="bg-input"
+                        />
+                      </div>
+                    </div>
 
-                {/* Sort */}
-                <div className="space-y-2">
-                  <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
-                  <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
-                    <SelectTrigger className="bg-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="price-high-low">Price: High to Low</SelectItem>
-                      <SelectItem value="price-low-high">Price: Low to High</SelectItem>
-                      <SelectItem value="most-rare">Most Rare</SelectItem>
-                      <SelectItem value="least-rare">Least Rare</SelectItem>
-                      {filters.watch && (
-                        <>
+                    {/* Sort */}
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
+                      <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
+                        <SelectTrigger className="bg-input">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
                           <SelectItem value="rarity-score-high">Rarity Score: High to Low</SelectItem>
                           <SelectItem value="rarity-score-low">Rarity Score: Low to High</SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                {/* Trait-specific filters */}
+                {filters.trait && !filters.watch && (
+                  <>
+                    {/* Rarity */}
+                    <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between p-0">
+                          <span className="font-medium text-sm text-muted-foreground">RARITY</span>
+                          {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-2 mt-2">
+                        {['common', 'rare', 'superrare', 'ultrarare', 'unique'].map((rarity) => (
+                          <div key={rarity} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={rarity}
+                              checked={filters[rarity as keyof Filters] as boolean}
+                              onCheckedChange={() => toggleFilter(rarity as keyof Filters)}
+                            />
+                            <label htmlFor={rarity} className="text-sm capitalize cursor-pointer">
+                              {rarity === 'superrare' ? 'Super Rare' : rarity === 'ultrarare' ? 'Ultra Rare' : rarity}
+                            </label>
+                          </div>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    {/* Trait Types */}
+                    <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between p-0">
+                          <span className="font-medium text-sm text-muted-foreground">TRAIT TYPES</span>
+                          {expandedSections.traitTypes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-2 mt-2">
+                        {TRAIT_TYPES.map((traitType) => (
+                          <div key={traitType} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`traitType-${traitType}`}
+                              checked={filters.traitTypes.includes(traitType)}
+                              onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
+                            />
+                            <label htmlFor={`traitType-${traitType}`} className="text-sm cursor-pointer">
+                              {traitType}
+                            </label>
+                          </div>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    {/* Themes - Scrollable */}
+                    <Collapsible open={expandedSections.themes} onOpenChange={() => toggleSection('themes')}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between p-0">
+                          <span className="font-medium text-sm text-muted-foreground">THEMES</span>
+                          {expandedSections.themes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-2">
+                        <div className="max-h-48 overflow-y-auto space-y-2 border border-border rounded-md p-3">
+                          {ALL_THEMES.map((theme) => (
+                            <div key={theme} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`theme-${theme}`}
+                                checked={filters.themes.includes(theme)}
+                                onCheckedChange={() => toggleArrayFilter('themes', theme)}
+                              />
+                              <label htmlFor={`theme-${theme}`} className="text-sm cursor-pointer">
+                                {theme}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    {/* Price Range */}
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={minPrice || ''}
+                          onChange={(e) => setMinPrice(Number(e.target.value))}
+                          className="bg-input"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={maxPrice || ''}
+                          onChange={(e) => setMaxPrice(Number(e.target.value))}
+                          className="bg-input"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sort */}
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
+                      <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
+                        <SelectTrigger className="bg-input">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                          <SelectItem value="most-rare">Most Rare</SelectItem>
+                          <SelectItem value="least-rare">Least Rare</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
               </div>
             </Card>
           </aside>
