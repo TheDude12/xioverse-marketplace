@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Grid, List, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, Filter, Grid, List, ChevronDown, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // Import generated images
 import watchHero from '@/assets/watch-hero.jpg';
@@ -62,6 +63,25 @@ const RARITY_COLORS = {
   'Unique': 'bg-gradient-nft text-white'
 };
 
+// All 20 themes
+const ALL_THEMES = [
+  'Alien', 'Aquatic', 'Biohazard', 'Corrosive', 'Cyberpunk', 
+  'Egyptian Mythology', 'Greek Mythology', 'Lava', 'Medieval Age', 'Magic',
+  'Military', 'Norse Mythology', 'Prehistory', 'Pirates', 'Renaissance',
+  'Robot', 'Mutant', 'Steampunk', 'Skeletal', 'Zombie'
+];
+
+// Trait types for watches
+const TRAIT_TYPES = ['Strap', 'Dial', 'Item', 'Hologram'];
+
+// Trait themes for each component type
+const TRAIT_THEMES = {
+  Strap: ALL_THEMES,
+  Dial: ALL_THEMES,
+  Item: ALL_THEMES,
+  Hologram: ALL_THEMES
+};
+
 export default function Marketplace() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
@@ -72,6 +92,7 @@ export default function Marketplace() {
   const [maxRarityScore, setMaxRarityScore] = useState<number>(100);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   
   const [filters, setFilters] = useState<Filters>({
     all: false,
@@ -99,104 +120,99 @@ export default function Marketplace() {
     rarity: false,
     rarityScore: false,
     themes: false,
-    traits: false,
     traitTypes: false,
     watchComponents: false,
-    watchTraits: false,
     watchStrap: false,
     watchDial: false,
     watchItem: false,
     watchHologram: false
   });
 
-  // Trait types and their themes
-  const TRAIT_TYPES = ['Strap', 'Dial', 'Item', 'Hologram'];
-  const ALL_THEMES = [
-    'Alien', 'Aquatic', 'Biohazard', 'Corrosive', 'Cyberpunk', 'Egyptian Mythology', 
-    'Greek Mythology', 'Lava', 'Medieval Age', 'Magic', 'Military', 'Norse Mythology', 
-    'Prehistory', 'Pirates', 'Renaissance', 'Robot', 'Mutant', 'Steampunk', 'Skeletal', 'Zombie'
-  ];
-  const TRAIT_THEMES = {
-    'Strap': ALL_THEMES,
-    'Dial': ALL_THEMES,
-    'Item': ALL_THEMES,
-    'Hologram': ALL_THEMES
-  };
-
-  // Mock data - replace with actual Google Sheets API call
+  // Mock data - replace with real API call
   useEffect(() => {
     const fetchAssets = async () => {
-      setLoading(true);
-      // Enhanced mock assets with proper gaming data
+      // Simulate API call
       const mockAssets: Asset[] = [
         {
           id: '1001',
           type: 'Watch',
           equipped: 'no',
-          traits: 'Legendary',
+          traits: 'Strap',
           theme: 'Cyberpunk',
-          name: 'Neon Genesis Watch',
+          strapId: '2001',
+          dialId: '2002',
+          itemId: '2003',
+          hologramId: '2004',
+          name: 'Cyber Watch Elite',
           rarity: 'Ultra Rare',
-          rarityValue: 95.8,
+          rarityValue: 95.4,
           lastSold: 2500,
           listed: 'yes',
           price: 3200,
-          imageUrl: watchHero
+          imageUrl: cyberWatch
         },
         {
           id: '1002',
           type: 'Trait',
           equipped: 'no',
-          traits: 'Epic',
-          theme: 'Holographic',
-          name: 'Plasma Glow Effect',
-          rarity: 'Super Rare',
-          rarityValue: 87.3,
-          lastSold: 1200,
+          traits: 'Item',
+          theme: 'Golden',
+          name: 'Golden Aura Trait',
+          rarity: 'Rare',
+          rarityValue: 78.2,
+          lastSold: 850,
           listed: 'yes',
-          price: 1800,
-          imageUrl: traitHero
+          price: 1200,
+          imageUrl: goldenTrait
         },
         {
           id: '1003',
           type: 'Watch',
           equipped: 'no',
-          traits: 'Rare',
-          theme: 'Futuristic',
-          name: 'Cyber Elite Timepiece',
-          rarity: 'Rare',
-          rarityValue: 76.2,
-          lastSold: 800,
-          listed: 'yes',
-          price: 1200,
-          imageUrl: cyberWatch
+          traits: 'Dial',
+          theme: 'Steampunk',
+          strapId: '2005',
+          dialId: '2006',
+          itemId: '2007',
+          hologramId: '2008',
+          name: 'Steam Powered Chronometer',
+          rarity: 'Super Rare',
+          rarityValue: 88.1,
+          lastSold: 1800,
+          listed: 'no',
+          price: 0,
+          imageUrl: watchHero
         },
         {
           id: '1004',
           type: 'Trait',
           equipped: 'no',
-          traits: 'Unique',
-          theme: 'Golden',
-          name: 'Divine Aura Boost',
+          traits: 'Hologram',
+          theme: 'Alien',
+          name: 'Xenomorph Hologram',
           rarity: 'Unique',
-          rarityValue: 99.9,
+          rarityValue: 99.8,
           lastSold: 5000,
           listed: 'yes',
           price: 7500,
-          imageUrl: goldenTrait
+          imageUrl: traitHero
         },
         {
           id: '1005',
           type: 'Watch',
           equipped: 'no',
-          traits: 'Common',
-          theme: 'Classic',
-          name: 'Standard Timer',
-          rarity: 'Common',
-          rarityValue: 45.1,
-          lastSold: 200,
+          traits: 'Strap',
+          theme: 'Military',
+          strapId: '2009',
+          dialId: '2010',
+          itemId: '2011',
+          hologramId: '2012',
+          name: 'Tactical Commander Watch',
+          rarity: 'Rare',
+          rarityValue: 82.7,
+          lastSold: 950,
           listed: 'yes',
-          price: 350,
+          price: 1350,
           imageUrl: watchHero
         },
         {
@@ -404,6 +420,323 @@ export default function Marketplace() {
     }));
   };
 
+  // Extract filters into a reusable function for both desktop and mobile
+  const renderFilters = () => (
+    <>
+      {/* Basic Filters */}
+      <div className="space-y-2">
+        <Button
+          variant={filters.all ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => toggleFilter('all')}
+          className="w-full justify-start"
+        >
+          All Items
+        </Button>
+        <Button
+          variant={filters.listed ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => toggleFilter('listed')}
+          className="w-full justify-start"
+        >
+          Listed Only
+        </Button>
+      </div>
+
+      {/* Item Type */}
+      <div className="space-y-2">
+        <h3 className="font-medium text-sm text-muted-foreground">ITEM TYPE</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant={filters.watch ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleFilter('watch')}
+          >
+            Watches
+          </Button>
+          <Button
+            variant={filters.trait ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleFilter('trait')}
+          >
+            Traits
+          </Button>
+        </div>
+      </div>
+
+      {/* Conditional Filters based on selection */}
+      {/* When both watches and traits are selected, only show price and basic filters */}
+      {(!filters.watch && !filters.trait) || (filters.watch && filters.trait) ? (
+        <>
+          {/* Price Range */}
+          <div className="space-y-2">
+            <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minPrice || ''}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                className="bg-input"
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxPrice || ''}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="bg-input"
+              />
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div className="space-y-2">
+            <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
+            <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
+              <SelectTrigger className="bg-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      ) : null}
+
+      {/* Watch-specific filters */}
+      {filters.watch && !filters.trait && (
+        <>
+          {/* Rarity Score Range */}
+          <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0">
+                <span className="font-medium text-sm text-muted-foreground">RARITY SCORE</span>
+                {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2 mt-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="number"
+                  placeholder="Min"
+                  min="0"
+                  max="100"
+                  value={minRarityScore || ''}
+                  onChange={(e) => setMinRarityScore(Number(e.target.value))}
+                  className="bg-input text-xs"
+                />
+                <Input
+                  type="number"
+                  placeholder="Max"
+                  min="0"
+                  max="100"
+                  value={maxRarityScore || ''}
+                  onChange={(e) => setMaxRarityScore(Number(e.target.value))}
+                  className="bg-input text-xs"
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Watch Traits */}
+          <Collapsible open={expandedSections.watchComponents} onOpenChange={() => toggleSection('watchComponents')}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0">
+                <span className="font-medium text-sm text-muted-foreground">WATCH TRAITS</span>
+                {expandedSections.watchComponents ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 mt-2">
+              {TRAIT_TYPES.map((componentType) => (
+                <Collapsible key={componentType} open={expandedSections[`watch${componentType}` as keyof typeof expandedSections]} onOpenChange={() => toggleSection(`watch${componentType}` as keyof typeof expandedSections)}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-0 text-xs">
+                      <span className="font-medium text-xs text-muted-foreground">{componentType.toUpperCase()}</span>
+                      {expandedSections[`watch${componentType}` as keyof typeof expandedSections] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2">
+                    <div className="max-h-32 overflow-y-auto space-y-1 border border-border rounded-md p-2">
+                      {TRAIT_THEMES[componentType as keyof typeof TRAIT_THEMES].map((theme) => (
+                        <div key={`${componentType}-${theme}`} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`watch${componentType}-${theme}`}
+                            checked={filters[`watch${componentType}Theme` as keyof Filters] 
+                              ? (filters[`watch${componentType}Theme` as keyof Filters] as string[]).includes(theme)
+                              : false}
+                            onCheckedChange={() => toggleArrayFilter(`watch${componentType}Theme` as keyof Filters, theme)}
+                          />
+                          <label htmlFor={`watch${componentType}-${theme}`} className="text-xs cursor-pointer">
+                            {theme}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Price Range */}
+          <div className="space-y-2">
+            <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minPrice || ''}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                className="bg-input"
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxPrice || ''}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="bg-input"
+              />
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div className="space-y-2">
+            <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
+            <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
+              <SelectTrigger className="bg-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                <SelectItem value="rarity-score-high">Rarity Score: High to Low</SelectItem>
+                <SelectItem value="rarity-score-low">Rarity Score: Low to High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
+
+      {/* Trait-specific filters */}
+      {filters.trait && !filters.watch && (
+        <>
+          {/* Rarity */}
+          <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0">
+                <span className="font-medium text-sm text-muted-foreground">RARITY</span>
+                {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2 mt-2">
+              {['common', 'rare', 'superrare', 'ultrarare', 'unique'].map((rarity) => (
+                <div key={rarity} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={rarity}
+                    checked={filters[rarity as keyof Filters] as boolean}
+                    onCheckedChange={() => toggleFilter(rarity as keyof Filters)}
+                  />
+                  <label htmlFor={rarity} className="text-sm capitalize cursor-pointer">
+                    {rarity === 'superrare' ? 'Super Rare' : rarity === 'ultrarare' ? 'Ultra Rare' : rarity}
+                  </label>
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Trait Types */}
+          <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0">
+                <span className="font-medium text-sm text-muted-foreground">TRAIT TYPES</span>
+                {expandedSections.traitTypes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2 mt-2">
+              {TRAIT_TYPES.map((traitType) => (
+                <div key={traitType} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`trait-type-${traitType}`}
+                    checked={filters.traitTypes.includes(traitType)}
+                    onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
+                  />
+                  <label htmlFor={`trait-type-${traitType}`} className="text-sm cursor-pointer">
+                    {traitType}
+                  </label>
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Themes */}
+          <Collapsible open={expandedSections.themes} onOpenChange={() => toggleSection('themes')}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0">
+                <span className="font-medium text-sm text-muted-foreground">THEMES</span>
+                {expandedSections.themes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-md p-2">
+                {ALL_THEMES.map((theme) => (
+                  <div key={theme} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`theme-${theme}`}
+                      checked={filters.themes.includes(theme)}
+                      onCheckedChange={() => toggleArrayFilter('themes', theme)}
+                    />
+                    <label htmlFor={`theme-${theme}`} className="text-xs cursor-pointer">
+                      {theme}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Price Range */}
+          <div className="space-y-2">
+            <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minPrice || ''}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                className="bg-input"
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxPrice || ''}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="bg-input"
+              />
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div className="space-y-2">
+            <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
+            <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
+              <SelectTrigger className="bg-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                <SelectItem value="most-rare">Most Rare</SelectItem>
+                <SelectItem value="least-rare">Least Rare</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
+    </>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -419,7 +752,8 @@ export default function Marketplace() {
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          {/* Desktop Header */}
+          <div className="hidden md:flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 XIOVERSE MARKETPLACE
@@ -458,13 +792,64 @@ export default function Marketplace() {
               </div>
             </div>
           </div>
+
+          {/* Mobile Header */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+                XIOVERSE
+              </h1>
+              <div className="flex items-center space-x-2">
+                <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <SlidersHorizontal className="w-4 h-4 mr-2" />
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80 bg-background border-border p-0">
+                    <div className="p-6 h-full overflow-y-auto">
+                      <div className="flex items-center gap-2 mb-6">
+                        <Filter className="w-5 h-5 text-primary animate-pulse" />
+                        <h2 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+                          FILTERS
+                        </h2>
+                      </div>
+                      <div className="space-y-4">
+                        {renderFilters()}
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+                
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Mobile Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search watches, traits, themes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-input border-border focus:ring-primary"
+              />
+            </div>
+          </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6">
         <div className="flex gap-6">
-          {/* Sidebar Filters */}
-          <aside className="w-80 shrink-0 space-y-4">
+          {/* Desktop Sidebar Filters */}
+          <aside className="hidden md:block w-80 shrink-0 space-y-4">
             <Card className="p-6 bg-card/90 border-border shadow-card sticky top-24 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-6">
                 <Filter className="w-5 h-5 text-primary animate-pulse" />
@@ -474,323 +859,13 @@ export default function Marketplace() {
               </div>
 
               <div className="space-y-4">
-                {/* Basic Filters */}
-                <div className="space-y-2">
-                  <Button
-                    variant={filters.all ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => toggleFilter('all')}
-                    className="w-full justify-start"
-                  >
-                    All Items
-                  </Button>
-                  <Button
-                    variant={filters.listed ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => toggleFilter('listed')}
-                    className="w-full justify-start"
-                  >
-                    Listed Only
-                  </Button>
-                </div>
-
-                {/* Item Type */}
-                <div className="space-y-2">
-                  <h3 className="font-medium text-sm text-muted-foreground">ITEM TYPE</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant={filters.watch ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => toggleFilter('watch')}
-                    >
-                      Watches
-                    </Button>
-                    <Button
-                      variant={filters.trait ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => toggleFilter('trait')}
-                    >
-                      Traits
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Conditional Filters based on selection */}
-                {/* When both watches and traits are selected, only show price and basic filters */}
-                {(!filters.watch && !filters.trait) || (filters.watch && filters.trait) ? (
-                  <>
-                    {/* Price Range */}
-                    <div className="space-y-2">
-                      <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Min"
-                          value={minPrice || ''}
-                          onChange={(e) => setMinPrice(Number(e.target.value))}
-                          className="bg-input"
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Max"
-                          value={maxPrice || ''}
-                          onChange={(e) => setMaxPrice(Number(e.target.value))}
-                          className="bg-input"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Sort */}
-                    <div className="space-y-2">
-                      <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
-                      <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
-                        <SelectTrigger className="bg-input">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
-                          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                ) : null}
-
-                {/* Watch-specific filters */}
-                {filters.watch && !filters.trait && (
-                  <>
-                    {/* Rarity Score Range */}
-                    <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0">
-                          <span className="font-medium text-sm text-muted-foreground">RARITY SCORE</span>
-                          {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="space-y-2 mt-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            type="number"
-                            placeholder="Min"
-                            min="0"
-                            max="100"
-                            value={minRarityScore || ''}
-                            onChange={(e) => setMinRarityScore(Number(e.target.value))}
-                            className="bg-input text-xs"
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Max"
-                            min="0"
-                            max="100"
-                            value={maxRarityScore || ''}
-                            onChange={(e) => setMaxRarityScore(Number(e.target.value))}
-                            className="bg-input text-xs"
-                          />
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Watch Traits */}
-                    <Collapsible open={expandedSections.watchComponents} onOpenChange={() => toggleSection('watchComponents')}>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0">
-                          <span className="font-medium text-sm text-muted-foreground">WATCH TRAITS</span>
-                          {expandedSections.watchComponents ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="space-y-4 mt-2">
-                        {TRAIT_TYPES.map((componentType) => (
-                          <Collapsible key={componentType} open={expandedSections[`watch${componentType}` as keyof typeof expandedSections]} onOpenChange={() => toggleSection(`watch${componentType}` as keyof typeof expandedSections)}>
-                            <CollapsibleTrigger asChild>
-                              <Button variant="ghost" className="w-full justify-between p-0 text-xs">
-                                <span className="font-medium text-xs text-muted-foreground">{componentType.toUpperCase()}</span>
-                                {expandedSections[`watch${componentType}` as keyof typeof expandedSections] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                              </Button>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-2">
-                              <div className="max-h-32 overflow-y-auto space-y-1 border border-border rounded-md p-2">
-                                {TRAIT_THEMES[componentType as keyof typeof TRAIT_THEMES].map((theme) => (
-                                  <div key={`${componentType}-${theme}`} className="flex items-center space-x-2">
-                                    <Checkbox
-                                      id={`watch${componentType}-${theme}`}
-                                      checked={filters[`watch${componentType}Theme` as keyof Filters] 
-                                        ? (filters[`watch${componentType}Theme` as keyof Filters] as string[]).includes(theme)
-                                        : false}
-                                      onCheckedChange={() => toggleArrayFilter(`watch${componentType}Theme` as keyof Filters, theme)}
-                                    />
-                                    <label htmlFor={`watch${componentType}-${theme}`} className="text-xs cursor-pointer">
-                                      {theme}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        ))}
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Price Range */}
-                    <div className="space-y-2">
-                      <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Min"
-                          value={minPrice || ''}
-                          onChange={(e) => setMinPrice(Number(e.target.value))}
-                          className="bg-input"
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Max"
-                          value={maxPrice || ''}
-                          onChange={(e) => setMaxPrice(Number(e.target.value))}
-                          className="bg-input"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Sort */}
-                    <div className="space-y-2">
-                      <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
-                      <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
-                        <SelectTrigger className="bg-input">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
-                          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
-                          <SelectItem value="rarity-score-high">Rarity Score: High to Low</SelectItem>
-                          <SelectItem value="rarity-score-low">Rarity Score: Low to High</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
-
-                {/* Trait-specific filters */}
-                {filters.trait && !filters.watch && (
-                  <>
-                    {/* Rarity */}
-                    <Collapsible open={expandedSections.rarity} onOpenChange={() => toggleSection('rarity')}>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0">
-                          <span className="font-medium text-sm text-muted-foreground">RARITY</span>
-                          {expandedSections.rarity ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="space-y-2 mt-2">
-                        {['common', 'rare', 'superrare', 'ultrarare', 'unique'].map((rarity) => (
-                          <div key={rarity} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={rarity}
-                              checked={filters[rarity as keyof Filters] as boolean}
-                              onCheckedChange={() => toggleFilter(rarity as keyof Filters)}
-                            />
-                            <label htmlFor={rarity} className="text-sm capitalize cursor-pointer">
-                              {rarity === 'superrare' ? 'Super Rare' : rarity === 'ultrarare' ? 'Ultra Rare' : rarity}
-                            </label>
-                          </div>
-                        ))}
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Trait Types */}
-                    <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0">
-                          <span className="font-medium text-sm text-muted-foreground">TRAIT TYPES</span>
-                          {expandedSections.traitTypes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="space-y-2 mt-2">
-                        {TRAIT_TYPES.map((traitType) => (
-                          <div key={traitType} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`traitType-${traitType}`}
-                              checked={filters.traitTypes.includes(traitType)}
-                              onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
-                            />
-                            <label htmlFor={`traitType-${traitType}`} className="text-sm cursor-pointer">
-                              {traitType}
-                            </label>
-                          </div>
-                        ))}
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Themes - Scrollable */}
-                    <Collapsible open={expandedSections.themes} onOpenChange={() => toggleSection('themes')}>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-0">
-                          <span className="font-medium text-sm text-muted-foreground">THEMES</span>
-                          {expandedSections.themes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-2">
-                        <div className="max-h-48 overflow-y-auto space-y-2 border border-border rounded-md p-3">
-                          {ALL_THEMES.map((theme) => (
-                            <div key={theme} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`theme-${theme}`}
-                                checked={filters.themes.includes(theme)}
-                                onCheckedChange={() => toggleArrayFilter('themes', theme)}
-                              />
-                              <label htmlFor={`theme-${theme}`} className="text-sm cursor-pointer">
-                                {theme}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Price Range */}
-                    <div className="space-y-2">
-                      <h3 className="font-medium text-sm text-muted-foreground">PRICE RANGE (USDC)</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Min"
-                          value={minPrice || ''}
-                          onChange={(e) => setMinPrice(Number(e.target.value))}
-                          className="bg-input"
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Max"
-                          value={maxPrice || ''}
-                          onChange={(e) => setMaxPrice(Number(e.target.value))}
-                          className="bg-input"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Sort */}
-                    <div className="space-y-2">
-                      <h3 className="font-medium text-sm text-muted-foreground">SORT BY</h3>
-                      <Select value={filters.sortBy} onValueChange={(value) => toggleFilter('sortBy', value)}>
-                        <SelectTrigger className="bg-input">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
-                          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
-                          <SelectItem value="most-rare">Most Rare</SelectItem>
-                          <SelectItem value="least-rare">Least Rare</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
+                {renderFilters()}
               </div>
             </Card>
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             <div className="mb-6 flex items-center justify-between">
               <p className="text-muted-foreground">
                 Showing {filteredAssets.length} of {assets.length} items
@@ -798,20 +873,20 @@ export default function Marketplace() {
             </div>
 
             {/* Asset Grid */}
-            <div className={`grid gap-6 ${
+            <div className={`grid gap-4 md:gap-6 ${
               viewMode === 'grid' 
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5' 
                 : 'grid-cols-1'
             }`}>
               {filteredAssets.map((asset) => (
-            <Card key={asset.id} className="group overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-gaming cursor-pointer hover:scale-[1.02]">
-              <div className="aspect-square relative overflow-hidden">
-                <img
-                  src={asset.imageUrl}
-                  alt={asset.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Card key={asset.id} className="group overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-gaming cursor-pointer hover:scale-[1.02]">
+                  <div className="aspect-square relative overflow-hidden">
+                    <img
+                      src={asset.imageUrl}
+                      alt={asset.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute top-2 right-2">
                       <Badge className={`${RARITY_COLORS[asset.rarity as keyof typeof RARITY_COLORS]} font-bold`}>
                         {asset.rarity}

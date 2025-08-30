@@ -1,8 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 const Navigation = () => {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleExternalLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -76,15 +80,71 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu */}
           <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogin}
-            >
-              Log In
-            </Button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 bg-background border-border">
+                <div className="flex flex-col space-y-4 mt-8">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
+                        item.current
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                  
+                  <div className="border-t border-border pt-4 space-y-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        handleExternalLink('https://www.mint.xioverse.com');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Mint
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        handleExternalLink('https://xioverse.com');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Website
+                    </Button>
+                    
+                    <Button
+                      variant="premium"
+                      size="sm"
+                      className="w-full mt-4"
+                      onClick={() => {
+                        handleLogin();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Log In
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
