@@ -299,11 +299,32 @@ export default function Marketplace() {
       filtered = filtered.filter(asset => asset.type === 'Trait');
     }
 
-    // Trait type filters (for traits)
-    if (filters.traitTypes.length > 0 && filters.trait) {
-      filtered = filtered.filter(asset => 
-        asset.type === 'Trait' && filters.traitTypes.includes(asset.traits)
-      );
+    // Trait theme filters (for traits)
+    if (filters.trait) {
+      // Check if any trait theme filters are active
+      const hasTraitThemeFilters = 
+        filters.traitStrapThemes.length > 0 || 
+        filters.traitDialThemes.length > 0 || 
+        filters.traitItemThemes.length > 0 || 
+        filters.traitHologramThemes.length > 0;
+
+      if (hasTraitThemeFilters) {
+        filtered = filtered.filter(asset => {
+          if (asset.type !== 'Trait') return false;
+          
+          // Check if the trait matches any of the selected theme filters
+          const matchesStrapThemes = filters.traitStrapThemes.length === 0 || 
+            (asset.traits === 'Strap' && filters.traitStrapThemes.includes(asset.theme));
+          const matchesDialThemes = filters.traitDialThemes.length === 0 || 
+            (asset.traits === 'Dial' && filters.traitDialThemes.includes(asset.theme));
+          const matchesItemThemes = filters.traitItemThemes.length === 0 || 
+            (asset.traits === 'Item' && filters.traitItemThemes.includes(asset.theme));
+          const matchesHologramThemes = filters.traitHologramThemes.length === 0 || 
+            (asset.traits === 'Hologram' && filters.traitHologramThemes.includes(asset.theme));
+          
+          return matchesStrapThemes || matchesDialThemes || matchesItemThemes || matchesHologramThemes;
+        });
+      }
     }
 
     // Theme filters
@@ -667,7 +688,7 @@ export default function Marketplace() {
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Trait Types with Nested Themes */}
+          {/* Trait Types */}
           <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0">
@@ -677,46 +698,32 @@ export default function Marketplace() {
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4 mt-2">
               {TRAIT_TYPES.map((traitType) => (
-                <div key={traitType} className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`trait-type-${traitType}`}
-                      checked={filters.traitTypes.includes(traitType)}
-                      onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
-                    />
-                    <label htmlFor={`trait-type-${traitType}`} className="text-sm cursor-pointer font-medium">
-                      {traitType}
-                    </label>
-                  </div>
-                  
-                  {/* Nested Themes for each trait type */}
-                  <Collapsible open={expandedSections[`trait${traitType}` as keyof typeof expandedSections]} onOpenChange={() => toggleSection(`trait${traitType}` as keyof typeof expandedSections)}>
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" className="w-full justify-between p-0 text-xs ml-6">
-                        <span className="font-medium text-xs text-muted-foreground">THEMES</span>
-                        {expandedSections[`trait${traitType}` as keyof typeof expandedSections] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="ml-6 mt-2">
-                      <div className="max-h-32 overflow-y-auto space-y-1 border border-border rounded-md p-2">
-                        {ALL_THEMES.map((theme) => (
-                          <div key={`${traitType}-${theme}`} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`trait${traitType}-${theme}`}
-                              checked={filters[`trait${traitType}Themes` as keyof Filters] 
-                                ? (filters[`trait${traitType}Themes` as keyof Filters] as string[]).includes(theme)
-                                : false}
-                              onCheckedChange={() => toggleArrayFilter(`trait${traitType}Themes` as keyof Filters, theme)}
-                            />
-                            <label htmlFor={`trait${traitType}-${theme}`} className="text-xs cursor-pointer">
-                              {theme}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
+                <Collapsible key={traitType} open={expandedSections[`trait${traitType}` as keyof typeof expandedSections]} onOpenChange={() => toggleSection(`trait${traitType}` as keyof typeof expandedSections)}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-0 text-xs">
+                      <span className="font-medium text-xs text-muted-foreground">{traitType.toUpperCase()}</span>
+                      {expandedSections[`trait${traitType}` as keyof typeof expandedSections] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2">
+                    <div className="max-h-32 overflow-y-auto space-y-1 border border-border rounded-md p-2">
+                      {ALL_THEMES.map((theme) => (
+                        <div key={`${traitType}-${theme}`} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`trait${traitType}-${theme}`}
+                            checked={filters[`trait${traitType}Themes` as keyof Filters] 
+                              ? (filters[`trait${traitType}Themes` as keyof Filters] as string[]).includes(theme)
+                              : false}
+                            onCheckedChange={() => toggleArrayFilter(`trait${traitType}Themes` as keyof Filters, theme)}
+                          />
+                          <label htmlFor={`trait${traitType}-${theme}`} className="text-xs cursor-pointer">
+                            {theme}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               ))}
             </CollapsibleContent>
           </Collapsible>
