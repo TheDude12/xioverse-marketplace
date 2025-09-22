@@ -32,6 +32,9 @@ interface Asset {
   listed: string;
   price: number;
   imageUrl: string;
+  isAuction?: boolean;
+  highestBid?: number;
+  auctionEndTime?: number;
 }
 
 interface Filters {
@@ -47,6 +50,10 @@ interface Filters {
   themes: string[];
   traits: string[];
   traitTypes: string[]; // For filtering by trait type (Strap, Dial, Item, Hologram)
+  traitStrapThemes: string[];
+  traitDialThemes: string[];
+  traitItemThemes: string[];
+  traitHologramThemes: string[];
   watchStrapTheme: string[];
   watchDialTheme: string[];
   watchItemTheme: string[];
@@ -107,6 +114,10 @@ export default function Marketplace() {
     themes: [],
     traits: [],
     traitTypes: [],
+    traitStrapThemes: [],
+    traitDialThemes: [],
+    traitItemThemes: [],
+    traitHologramThemes: [],
     watchStrapTheme: [],
     watchDialTheme: [],
     watchItemTheme: [],
@@ -121,6 +132,10 @@ export default function Marketplace() {
     rarityScore: false,
     themes: false,
     traitTypes: false,
+    traitStrap: false,
+    traitDial: false,
+    traitItem: false,
+    traitHologram: false,
     watchComponents: false,
     watchStrap: false,
     watchDial: false,
@@ -149,6 +164,9 @@ export default function Marketplace() {
           lastSold: 2500,
           listed: 'yes',
           price: 3200,
+          isAuction: true,
+          highestBid: 2800,
+          auctionEndTime: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
           imageUrl: cyberWatch
         },
         {
@@ -195,6 +213,9 @@ export default function Marketplace() {
           lastSold: 5000,
           listed: 'yes',
           price: 7500,
+          isAuction: true,
+          highestBid: 6800,
+          auctionEndTime: Date.now() + 12 * 60 * 60 * 1000, // 12 hours from now
           imageUrl: traitHero
         },
         {
@@ -646,7 +667,7 @@ export default function Marketplace() {
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Trait Types */}
+          {/* Trait Types with Nested Themes */}
           <Collapsible open={expandedSections.traitTypes} onOpenChange={() => toggleSection('traitTypes')}>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0">
@@ -654,45 +675,49 @@ export default function Marketplace() {
                 {expandedSections.traitTypes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 mt-2">
+            <CollapsibleContent className="space-y-4 mt-2">
               {TRAIT_TYPES.map((traitType) => (
-                <div key={traitType} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`trait-type-${traitType}`}
-                    checked={filters.traitTypes.includes(traitType)}
-                    onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
-                  />
-                  <label htmlFor={`trait-type-${traitType}`} className="text-sm cursor-pointer">
-                    {traitType}
-                  </label>
-                </div>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Themes */}
-          <Collapsible open={expandedSections.themes} onOpenChange={() => toggleSection('themes')}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0">
-                <span className="font-medium text-sm text-muted-foreground">THEMES</span>
-                {expandedSections.themes ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-2">
-              <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-md p-2">
-                {ALL_THEMES.map((theme) => (
-                  <div key={theme} className="flex items-center space-x-2">
+                <div key={traitType} className="space-y-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={`theme-${theme}`}
-                      checked={filters.themes.includes(theme)}
-                      onCheckedChange={() => toggleArrayFilter('themes', theme)}
+                      id={`trait-type-${traitType}`}
+                      checked={filters.traitTypes.includes(traitType)}
+                      onCheckedChange={() => toggleArrayFilter('traitTypes', traitType)}
                     />
-                    <label htmlFor={`theme-${theme}`} className="text-xs cursor-pointer">
-                      {theme}
+                    <label htmlFor={`trait-type-${traitType}`} className="text-sm cursor-pointer font-medium">
+                      {traitType}
                     </label>
                   </div>
-                ))}
-              </div>
+                  
+                  {/* Nested Themes for each trait type */}
+                  <Collapsible open={expandedSections[`trait${traitType}` as keyof typeof expandedSections]} onOpenChange={() => toggleSection(`trait${traitType}` as keyof typeof expandedSections)}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full justify-between p-0 text-xs ml-6">
+                        <span className="font-medium text-xs text-muted-foreground">THEMES</span>
+                        {expandedSections[`trait${traitType}` as keyof typeof expandedSections] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="ml-6 mt-2">
+                      <div className="max-h-32 overflow-y-auto space-y-1 border border-border rounded-md p-2">
+                        {ALL_THEMES.map((theme) => (
+                          <div key={`${traitType}-${theme}`} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`trait${traitType}-${theme}`}
+                              checked={filters[`trait${traitType}Themes` as keyof Filters] 
+                                ? (filters[`trait${traitType}Themes` as keyof Filters] as string[]).includes(theme)
+                                : false}
+                              onCheckedChange={() => toggleArrayFilter(`trait${traitType}Themes` as keyof Filters, theme)}
+                            />
+                            <label htmlFor={`trait${traitType}-${theme}`} className="text-xs cursor-pointer">
+                              {theme}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
+              ))}
             </CollapsibleContent>
           </Collapsible>
 
@@ -909,9 +934,15 @@ export default function Marketplace() {
                     
                     <div className="grid grid-cols-2 gap-4 py-2">
                       <div>
-                        <p className="text-xs text-muted-foreground mb-1">Current Price</p>
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {asset.isAuction ? 'Highest Bid' : 'Current Price'}
+                        </p>
                         <p className="font-bold text-lg text-primary">
-                          {asset.price ? `${asset.price.toLocaleString()} USDC` : 'Make Offer'}
+                          {asset.isAuction && asset.highestBid 
+                            ? `${asset.highestBid.toLocaleString()} USDC`
+                            : asset.price 
+                            ? `${asset.price.toLocaleString()} USDC` 
+                            : 'Make Offer'}
                         </p>
                       </div>
                       <div className="text-right">
@@ -922,9 +953,29 @@ export default function Marketplace() {
                       </div>
                     </div>
                     
-                    <Button variant="gaming" className="w-full">
-                      {asset.price ? 'Buy Now' : 'Make Offer'}
-                    </Button>
+                    <div className="flex gap-2">
+                      {asset.isAuction ? (
+                        <>
+                          <Button variant="gaming" className="flex-1">
+                            Bid
+                          </Button>
+                          {asset.price && (
+                            <Button variant="outline" className="flex-1">
+                              Buy Now
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Button variant="gaming" className="flex-1">
+                            {asset.price ? 'Buy Now' : 'Make Offer'}
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            Make Offer
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
