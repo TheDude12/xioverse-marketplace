@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Grid, List, ChevronDown, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,6 +91,7 @@ const TRAIT_THEMES = {
 };
 
 export default function Marketplace() {
+  const navigate = useNavigate();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -911,7 +913,11 @@ export default function Marketplace() {
                 : 'grid-cols-1'
             }`}>
               {filteredAssets.map((asset) => (
-                <Card key={asset.id} className="group overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-gaming cursor-pointer hover:scale-[1.02]">
+                <Card 
+                  key={asset.id} 
+                  className="group overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-gaming cursor-pointer hover:scale-[1.02]"
+                  onClick={() => navigate(`/asset/${asset.id}`)}
+                >
                   <div className="aspect-square relative overflow-hidden">
                     <img
                       src={asset.imageUrl}
@@ -963,21 +969,49 @@ export default function Marketplace() {
                     <div className="flex gap-2">
                       {asset.isAuction ? (
                         <>
-                          <Button variant="gaming" className="flex-1">
+                          <Button 
+                            variant="gaming" 
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/asset/${asset.id}`);
+                            }}
+                          >
                             Bid
                           </Button>
                           {asset.price && (
-                            <Button variant="outline" className="flex-1">
+                            <Button 
+                              variant="outline" 
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/asset/${asset.id}`);
+                              }}
+                            >
                               Buy Now
                             </Button>
                           )}
                         </>
                       ) : (
                         <>
-                          <Button variant="gaming" className="flex-1">
+                          <Button 
+                            variant="gaming" 
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/asset/${asset.id}`);
+                            }}
+                          >
                             {asset.price ? 'Buy Now' : 'Make Offer'}
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/asset/${asset.id}`);
+                            }}
+                          >
                             Make Offer
                           </Button>
                         </>
