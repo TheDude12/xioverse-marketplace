@@ -265,11 +265,25 @@ const AssetDetail = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Owner</p>
-                    <p className="font-mono text-xs">{asset.owner}</p>
+                    <a 
+                      href={`https://elated-tan-skat.explorer.mainnet.skalenodes.com/address/${asset.owner}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {`${asset.owner.slice(0, 6)}...${asset.owner.slice(-4)}`}
+                    </a>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Blockchain</p>
-                    <p className="font-semibold">ERC SKALE</p>
+                    <a
+                      href={`https://elated-tan-skat.explorer.mainnet.skalenodes.com/token/0x742d35Cc6C6C4532BC558B40c22469DDC38C95e1?a=${asset.tokenId.replace('#', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-primary hover:text-primary/80 transition-colors"
+                    >
+                      ERC SKALE
+                    </a>
                   </div>
                   {asset.lastSalePrice && (
                     <div>
