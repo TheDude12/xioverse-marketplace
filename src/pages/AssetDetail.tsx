@@ -46,37 +46,137 @@ const AssetDetail = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [videoModal, setVideoModal] = useState<{ isOpen: boolean; component?: string }>({ isOpen: false });
 
-  // Mock data based on ID
+  // Mock data based on ID - create different examples
   useEffect(() => {
     if (!id) return;
     
     const isWatch = id.includes('watch');
-    const mockAsset: Asset = {
-      id,
-      type: isWatch ? 'watch' : 'trait',
-      name: isWatch ? 'Cyber Genesis Watch #1247' : 'Alien Strap Component',
-      image: isWatch ? watchHero : goldenTrait,
-      rarity: isWatch ? 95.2 : 87.5,
-      tokenId: `#${id}`,
-      owner: '0x742d35Cc6C6C4532BC558B40c22469DDC38C95e1',
-      lastSalePrice: 2.5,
-      listingType: Math.random() > 0.5 ? 'both' : Math.random() > 0.5 ? 'auction' : 'buyNow',
-      currentPrice: 3.2,
-      highestBid: 2.8,
-      timeRemaining: '2d 14h 32m'
-    };
-
+    
+    // Create different examples based on ID
+    let mockAsset: Asset;
+    
     if (isWatch) {
-      mockAsset.components = {
-        strap: { name: 'Cyber Strap Alpha', theme: 'Alien', rarity: 89.3, video: '/videos/strap.mp4' },
-        dial: { name: 'Quantum Dial', theme: 'Aquatic', rarity: 92.1, video: '/videos/dial.mp4' },
-        hologram: { name: 'Genesis Hologram', theme: 'Cyber', rarity: 95.7, video: '/videos/hologram.mp4' },
-        item: { name: 'Power Core', theme: 'Ancient', rarity: 88.4, video: '/videos/item.mp4' }
-      };
+      if (id === 'watch1') {
+        // Watch with bid and make offer only
+        mockAsset = {
+          id,
+          type: 'watch',
+          name: 'Cyber Genesis Watch #1247',
+          image: watchHero,
+          rarity: 95.2,
+          tokenId: '#1247',
+          owner: '0x742d35Cc6C6C4532BC558B40c22469DDC38C95e1',
+          lastSalePrice: 2.5,
+          listingType: 'auction',
+          highestBid: 2.8,
+          timeRemaining: '2d 14h 32m',
+          components: {
+            strap: { name: 'Cyber Strap Alpha', theme: 'Alien', rarity: 89.3, video: '/videos/strap.mp4' },
+            dial: { name: 'Quantum Dial', theme: 'Aquatic', rarity: 92.1, video: '/videos/dial.mp4' },
+            hologram: { name: 'Genesis Hologram', theme: 'Cyber', rarity: 95.7, video: '/videos/hologram.mp4' },
+            item: { name: 'Power Core', theme: 'Ancient', rarity: 88.4, video: '/videos/item.mp4' }
+          }
+        };
+      } else if (id === 'watch2') {
+        // Watch with bid, buy now and make offer
+        mockAsset = {
+          id,
+          type: 'watch',
+          name: 'Holographic Timekeeper #892',
+          image: cyberWatch,
+          rarity: 87.3,
+          tokenId: '#892',
+          owner: '0x523f45Bb6B7C3421BC558B40c22469DDC38C95e2',
+          lastSalePrice: 4.2,
+          listingType: 'both',
+          currentPrice: 5.8,
+          highestBid: 4.9,
+          timeRemaining: '1d 8h 15m',
+          components: {
+            strap: { name: 'Holographic Strap', theme: 'Cyber', rarity: 82.1, video: '/videos/strap.mp4' },
+            dial: { name: 'Time Flux Dial', theme: 'Ancient', rarity: 88.7, video: '/videos/dial.mp4' },
+            hologram: { name: 'Quantum Field', theme: 'Aquatic', rarity: 91.2, video: '/videos/hologram.mp4' },
+            item: { name: 'Energy Crystal', theme: 'Alien', rarity: 85.9, video: '/videos/item.mp4' }
+          }
+        };
+      } else {
+        // Watch with buy now and make offer only
+        mockAsset = {
+          id,
+          type: 'watch',
+          name: 'Ancient Chronometer #456',
+          image: traitHero,
+          rarity: 92.8,
+          tokenId: '#456',
+          owner: '0x834e67Ff8H9D5643BC558B40c22469DDC38C95e3',
+          lastSalePrice: 3.7,
+          listingType: 'buyNow',
+          currentPrice: 4.5,
+          components: {
+            strap: { name: 'Ancient Leather', theme: 'Ancient', rarity: 90.5, video: '/videos/strap.mp4' },
+            dial: { name: 'Rune Dial', theme: 'Ancient', rarity: 93.2, video: '/videos/dial.mp4' },
+            hologram: { name: 'Spirit Field', theme: 'Ancient', rarity: 89.8, video: '/videos/hologram.mp4' },
+            item: { name: 'Mystic Gem', theme: 'Ancient', rarity: 94.1, video: '/videos/item.mp4' }
+          }
+        };
+      }
     } else {
-      mockAsset.theme = 'Alien';
-      mockAsset.traitType = 'Strap';
-      mockAsset.lore = 'Forged in the depths of an alien world, this strap pulses with otherworldly energy that synchronizes with the wearer\'s biorhythm.';
+      // Traits with different sale types
+      if (id === 'trait1') {
+        // Trait with bid and make offer only
+        mockAsset = {
+          id,
+          type: 'trait',
+          name: 'Alien Strap Component',
+          image: goldenTrait,
+          rarity: 87.5,
+          tokenId: '#2341',
+          owner: '0x742d35Cc6C6C4532BC558B40c22469DDC38C95e1',
+          lastSalePrice: 1.2,
+          listingType: 'auction',
+          highestBid: 1.8,
+          timeRemaining: '3d 2h 45m',
+          theme: 'Alien',
+          traitType: 'Strap',
+          lore: 'Forged in the depths of an alien world, this strap pulses with otherworldly energy that synchronizes with the wearer\'s biorhythm.'
+        };
+      } else if (id === 'trait2') {
+        // Trait with buy now and make offer only
+        mockAsset = {
+          id,
+          type: 'trait',
+          name: 'Aquatic Dial Fragment',
+          image: cyberWatch,
+          rarity: 92.1,
+          tokenId: '#5672',
+          owner: '0x523f45Bb6B7C3421BC558B40c22469DDC38C95e2',
+          lastSalePrice: 2.8,
+          listingType: 'buyNow',
+          currentPrice: 3.4,
+          theme: 'Aquatic',
+          traitType: 'Dial',
+          lore: 'Crystallized from the deepest ocean trenches, this dial component shimmers with the essence of ancient sea creatures.'
+        };
+      } else {
+        // Trait with bid, buy now and make offer
+        mockAsset = {
+          id,
+          type: 'trait',
+          name: 'Cyber Hologram Core',
+          image: traitHero,
+          rarity: 95.7,
+          tokenId: '#8901',
+          owner: '0x834e67Ff8H9D5643BC558B40c22469DDC38C95e3',
+          lastSalePrice: 5.1,
+          listingType: 'both',
+          currentPrice: 6.2,
+          highestBid: 5.8,
+          timeRemaining: '4d 12h 20m',
+          theme: 'Cyber',
+          traitType: 'Hologram',
+          lore: 'A fragment of pure digital consciousness, this hologram core contains the memories of a thousand virtual worlds.'
+        };
+      }
     }
 
     setAsset(mockAsset);

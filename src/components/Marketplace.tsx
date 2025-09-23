@@ -36,6 +36,7 @@ interface Asset {
   isAuction?: boolean;
   highestBid?: number;
   auctionEndTime?: number;
+  traitType?: string; // For traits: Strap, Dial, Item, Hologram
 }
 
 interface Filters {
@@ -150,8 +151,9 @@ export default function Marketplace() {
     const fetchAssets = async () => {
       // Simulate API call
       const mockAssets: Asset[] = [
+        // Watch examples
         {
-          id: '1001',
+          id: 'watch1', // Watch with bid and make offer only
           type: 'Watch',
           equipped: 'no',
           traits: 'Strap',
@@ -160,33 +162,19 @@ export default function Marketplace() {
           dialId: '2002',
           itemId: '2003',
           hologramId: '2004',
-          name: 'Cyber Watch Elite',
+          name: 'Cyber Genesis Watch',
           rarity: 'Ultra Rare',
-          rarityValue: 95.4,
+          rarityValue: 95.2,
           lastSold: 2500,
           listed: 'yes',
-          price: 3200,
+          price: 0, // No buy now price
           isAuction: true,
           highestBid: 2800,
-          auctionEndTime: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
-          imageUrl: cyberWatch
+          auctionEndTime: Date.now() + 24 * 60 * 60 * 1000,
+          imageUrl: watchHero
         },
         {
-          id: '1002',
-          type: 'Trait',
-          equipped: 'no',
-          traits: 'Item',
-          theme: 'Golden',
-          name: 'Golden Aura Trait',
-          rarity: 'Rare',
-          rarityValue: 78.2,
-          lastSold: 850,
-          listed: 'yes',
-          price: 1200,
-          imageUrl: goldenTrait
-        },
-        {
-          id: '1003',
+          id: 'watch2', // Watch with bid, buy now and make offer
           type: 'Watch',
           equipped: 'no',
           traits: 'Dial',
@@ -195,61 +183,87 @@ export default function Marketplace() {
           dialId: '2006',
           itemId: '2007',
           hologramId: '2008',
-          name: 'Steam Powered Chronometer',
+          name: 'Holographic Timekeeper',
           rarity: 'Super Rare',
-          rarityValue: 88.1,
-          lastSold: 1800,
-          listed: 'no',
-          price: 0,
-          imageUrl: watchHero
-        },
-        {
-          id: '1004',
-          type: 'Trait',
-          equipped: 'no',
-          traits: 'Hologram',
-          theme: 'Alien',
-          name: 'Xenomorph Hologram',
-          rarity: 'Unique',
-          rarityValue: 99.8,
-          lastSold: 5000,
+          rarityValue: 87.3,
+          lastSold: 4200,
           listed: 'yes',
-          price: 7500,
+          price: 5800,
           isAuction: true,
-          highestBid: 6800,
-          auctionEndTime: Date.now() + 12 * 60 * 60 * 1000, // 12 hours from now
-          imageUrl: traitHero
+          highestBid: 4900,
+          auctionEndTime: Date.now() + 12 * 60 * 60 * 1000,
+          imageUrl: cyberWatch
         },
         {
-          id: '1005',
+          id: 'watch3', // Watch with buy now and make offer only
           type: 'Watch',
           equipped: 'no',
-          traits: 'Strap',
-          theme: 'Military',
+          traits: 'Hologram',
+          theme: 'Ancient',
           strapId: '2009',
           dialId: '2010',
           itemId: '2011',
           hologramId: '2012',
-          name: 'Tactical Commander Watch',
+          name: 'Ancient Chronometer',
           rarity: 'Rare',
-          rarityValue: 82.7,
-          lastSold: 950,
+          rarityValue: 92.8,
+          lastSold: 3700,
           listed: 'yes',
-          price: 1350,
-          imageUrl: watchHero
+          price: 4500,
+          isAuction: false,
+          imageUrl: traitHero
         },
+        // Trait examples
         {
-          id: '1006',
+          id: 'trait1', // Trait with bid and make offer only
           type: 'Trait',
           equipped: 'no',
-          traits: 'Super Rare',
-          theme: 'Neon',
-          name: 'Electric Storm Effect',
+          traits: 'Strap',
+          theme: 'Alien',
+          traitType: 'Strap',
+          name: 'Alien Strap Component',
           rarity: 'Super Rare',
-          rarityValue: 89.7,
-          lastSold: 1500,
-          listed: 'no',
-          price: 0,
+          rarityValue: 87.5,
+          lastSold: 1200,
+          listed: 'yes',
+          price: 0, // No buy now price
+          isAuction: true,
+          highestBid: 1800,
+          auctionEndTime: Date.now() + 36 * 60 * 60 * 1000,
+          imageUrl: goldenTrait
+        },
+        {
+          id: 'trait2', // Trait with buy now and make offer only
+          type: 'Trait',
+          equipped: 'no',
+          traits: 'Dial',
+          theme: 'Aquatic',
+          traitType: 'Dial',
+          name: 'Aquatic Dial Fragment',
+          rarity: 'Rare',
+          rarityValue: 92.1,
+          lastSold: 2800,
+          listed: 'yes',
+          price: 3400,
+          isAuction: false,
+          imageUrl: cyberWatch
+        },
+        {
+          id: 'trait3', // Trait with bid, buy now and make offer
+          type: 'Trait',
+          equipped: 'no',
+          traits: 'Hologram',
+          theme: 'Cyber',
+          traitType: 'Hologram',
+          name: 'Cyber Hologram Core',
+          rarity: 'Unique',
+          rarityValue: 95.7,
+          lastSold: 5100,
+          listed: 'yes',
+          price: 6200,
+          isAuction: true,
+          highestBid: 5800,
+          auctionEndTime: Date.now() + 48 * 60 * 60 * 1000,
           imageUrl: traitHero
         }
       ];
@@ -927,12 +941,12 @@ export default function Marketplace() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute top-2 right-2">
                       <Badge className={`${RARITY_COLORS[asset.rarity as keyof typeof RARITY_COLORS]} font-bold`}>
-                        {asset.rarity}
+                        {asset.type === 'Watch' ? `${asset.rarityValue}%` : asset.rarity}
                       </Badge>
                     </div>
                     <div className="absolute top-2 left-2">
                       <Badge variant="secondary" className="bg-background/80">
-                        {asset.type}
+                        {asset.type === 'Watch' ? 'Watch' : asset.traitType || asset.type}
                       </Badge>
                     </div>
                   </div>
