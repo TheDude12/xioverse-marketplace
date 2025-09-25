@@ -104,7 +104,7 @@ const Sell = () => {
   };
 
   const handleAssetClick = (asset) => {
-    navigate(`/asset/${asset.id}`);
+    navigate(`/my-asset/${asset.id}`);
   };
 
   return (
