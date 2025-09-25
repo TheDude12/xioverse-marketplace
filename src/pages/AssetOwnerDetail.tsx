@@ -89,6 +89,11 @@ const AssetOwnerDetail = () => {
   const [componentVideo, setComponentVideo] = useState({ open: false, component: null });
   const [listingDialog, setListingDialog] = useState({ open: false, type: 'create' });
   const [acceptDialog, setAcceptDialog] = useState({ open: false, type: null, item: null });
+  const [listingType, setListingType] = useState('sale');
+  const [price, setPrice] = useState('');
+  const [auctionPrice, setAuctionPrice] = useState('');
+  const [reservePrice, setReservePrice] = useState('');
+  const [duration, setDuration] = useState('7');
 
   const asset = mockAssets.find(a => a.id === id);
 
@@ -113,8 +118,9 @@ const AssetOwnerDetail = () => {
     setComponentVideo({ open: true, component });
   };
 
-  const handleRemoveListing = () => {
-    // Handle remove listing logic
+  const handleRemoveListing = (type = 'all') => {
+    // Handle remove listing logic based on type
+    console.log(`Removing listing type: ${type}`);
     setListingDialog({ open: false, type: 'create' });
   };
 
@@ -344,33 +350,87 @@ const AssetOwnerDetail = () => {
             <div className="space-y-4">
               <div>
                 <Label>Listing Type</Label>
-                <Select defaultValue="sale">
+                <Select value={listingType} onValueChange={setListingType}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="sale">Fixed Price</SelectItem>
                     <SelectItem value="auction">Auction</SelectItem>
+                    <SelectItem value="both">Both (Auction + Buy Now)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Price (ETH)</Label>
-                <Input placeholder="Enter price..." />
-              </div>
-              <div>
-                <Label>Duration (Days)</Label>
-                <Input placeholder="7" type="number" />
-              </div>
+
+              {(listingType === 'sale' || listingType === 'both') && (
+                <div>
+                  <Label>Buy Now Price (ETH)</Label>
+                  <Input 
+                    placeholder="Enter buy now price..." 
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {(listingType === 'auction' || listingType === 'both') && (
+                <>
+                  <div>
+                    <Label>Starting Bid (ETH)</Label>
+                    <Input 
+                      placeholder="Enter starting bid..." 
+                      value={auctionPrice}
+                      onChange={(e) => setAuctionPrice(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Reserve Price (ETH) - Optional</Label>
+                    <Input 
+                      placeholder="Hidden minimum price..." 
+                      value={reservePrice}
+                      onChange={(e) => setReservePrice(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Reserve price is hidden from bidders. Auction fails if reserve not met.
+                    </p>
+                  </div>
+                  <div>
+                    <Label>Duration (Days)</Label>
+                    <Input 
+                      placeholder="7" 
+                      type="number" 
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="flex gap-2">
                 <Button className="flex-1">
                   {listingDialog.type === 'edit' ? 'Update Listing' : 'Create Listing'}
                 </Button>
                 {listingDialog.type === 'edit' && (
-                  <Button variant="destructive" onClick={handleRemoveListing}>
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Remove
-                  </Button>
+                  <>
+                    {asset.listing?.type === 'both' ? (
+                      <>
+                        <Button variant="destructive" onClick={() => handleRemoveListing('auction')}>
+                          Remove Auction
+                        </Button>
+                        <Button variant="destructive" onClick={() => handleRemoveListing('sale')}>
+                          Remove Buy Now
+                        </Button>
+                        <Button variant="destructive" onClick={() => handleRemoveListing('all')}>
+                          Remove All
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="destructive" onClick={() => handleRemoveListing('all')}>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Remove
+                      </Button>
+                    )}
+                  </>
                 )}
                 <Button variant="outline" onClick={() => setListingDialog({ open: false, type: 'create' })}>
                   Cancel
