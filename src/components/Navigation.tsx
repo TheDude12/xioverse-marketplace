@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import xioverseLogoImg from '@/assets/xioverse-logo.png';
 
 const Navigation = () => {
   const location = useLocation();
@@ -29,8 +30,12 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <div className="flex-shrink-0">
-            <Link to="/" className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Xioverse
+            <Link to="/" className="flex items-center">
+              <img 
+                src={xioverseLogoImg} 
+                alt="Xioverse" 
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 
