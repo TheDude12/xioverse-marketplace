@@ -15,7 +15,6 @@ const Overview = () => {
                   className="w-full h-full object-cover"
                   controls
                   autoPlay
-                  muted
                   loop
                   poster="/assets/watch-hero.jpg"
                 >
