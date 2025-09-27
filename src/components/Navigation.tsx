@@ -73,7 +73,7 @@ const Navigation = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleExternalLink('https://www.mint.xioverse.com')}
+                onClick={() => handleExternalLink('https://mint.xioverse.com')}
                 className="text-muted-foreground hover:text-foreground"
               >
                 Mint
@@ -135,7 +135,7 @@ const Navigation = () => {
                       size="sm"
                       className="w-full justify-start"
                       onClick={() => {
-                        handleExternalLink('https://www.mint.xioverse.com');
+                        handleExternalLink('https://mint.xioverse.com');
                         setMobileMenuOpen(false);
                       }}
                     >
