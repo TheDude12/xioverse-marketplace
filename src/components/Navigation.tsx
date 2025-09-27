@@ -4,18 +4,31 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import xioverseLogoImg from '@/assets/xioverse-logo.png';
+import LoginPopup from './LoginPopup';
 
 const Navigation = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+  const [loginMessage, setLoginMessage] = useState<string | undefined>();
+
+  // TODO: Replace with actual authentication state
+  const isLoggedIn = false;
 
   const handleExternalLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleLogin = () => {
-    // TODO: Open login popup when implemented
-    console.log('Login popup to be implemented');
+    setLoginPopupOpen(true);
+  };
+
+  const handleSellClick = (e: React.MouseEvent) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      setLoginMessage("Please login to view your collection");
+      setLoginPopupOpen(true);
+    }
   };
 
   const navItems = [
@@ -46,6 +59,7 @@ const Navigation = () => {
                 <Link
                   key={item.name}
                   to={item.path}
+                  onClick={item.name === 'Sell' ? handleSellClick : undefined}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     item.current
                       ? 'bg-primary/10 text-primary'
@@ -95,20 +109,25 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-80 bg-background border-border">
                 <div className="flex flex-col space-y-4 mt-8">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
-                        item.current
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                      }`}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+                   {navItems.map((item) => (
+                     <Link
+                       key={item.name}
+                       to={item.path}
+                       onClick={(e) => {
+                         if (item.name === 'Sell') {
+                           handleSellClick(e);
+                         }
+                         setMobileMenuOpen(false);
+                       }}
+                       className={`px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
+                         item.current
+                           ? 'bg-primary/10 text-primary'
+                           : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                       }`}
+                     >
+                       {item.name}
+                     </Link>
+                   ))}
                   
                   <div className="border-t border-border pt-4 space-y-2">
                     <Button
@@ -153,6 +172,15 @@ const Navigation = () => {
           </div>
         </div>
       </div>
+      
+      <LoginPopup 
+        open={loginPopupOpen} 
+        onOpenChange={(open) => {
+          setLoginPopupOpen(open);
+          if (!open) setLoginMessage(undefined);
+        }}
+        message={loginMessage}
+      />
     </nav>
   );
 };
