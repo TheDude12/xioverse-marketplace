@@ -34,7 +34,7 @@ const Navigation = () => {
               <img 
                 src={xioverseLogoImg} 
                 alt="Xioverse" 
-                className="h-8 w-auto"
+                className="h-16 w-auto"
               />
             </Link>
           </div>
