@@ -13,7 +13,7 @@ const Navigation = () => {
   const [loginMessage, setLoginMessage] = useState<string | undefined>();
 
   // TODO: Replace with actual authentication state
-  const isLoggedIn = false;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleExternalLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -21,6 +21,15 @@ const Navigation = () => {
 
   const handleLogin = () => {
     setLoginPopupOpen(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    console.log('Logged out - simulated for development');
+  };
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
   };
 
   const handleSellClick = (e: React.MouseEvent) => {
@@ -91,10 +100,10 @@ const Navigation = () => {
               <Button
                 variant="premium"
                 size="sm"
-                onClick={handleLogin}
+                onClick={isLoggedIn ? handleLogout : handleLogin}
                 className="ml-4"
               >
-                Log In
+                {isLoggedIn ? 'Log Out' : 'Log In'}
               </Button>
             </div>
           </div>
@@ -154,32 +163,37 @@ const Navigation = () => {
                       Website
                     </Button>
                     
-                    <Button
-                      variant="premium"
-                      size="sm"
-                      className="w-full mt-4"
-                      onClick={() => {
-                        handleLogin();
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Log In
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </div>
-      
-      <LoginPopup 
-        open={loginPopupOpen} 
-        onOpenChange={(open) => {
-          setLoginPopupOpen(open);
-          if (!open) setLoginMessage(undefined);
-        }}
-        message={loginMessage}
+                     <Button
+                       variant="premium"
+                       size="sm"
+                       className="w-full mt-4"
+                       onClick={() => {
+                         if (isLoggedIn) {
+                           handleLogout();
+                         } else {
+                           handleLogin();
+                         }
+                         setMobileMenuOpen(false);
+                       }}
+                     >
+                       {isLoggedIn ? 'Log Out' : 'Log In'}
+                     </Button>
+                   </div>
+                 </div>
+               </SheetContent>
+             </Sheet>
+           </div>
+         </div>
+       </div>
+       
+       <LoginPopup 
+         open={loginPopupOpen} 
+         onOpenChange={(open) => {
+           setLoginPopupOpen(open);
+           if (!open) setLoginMessage(undefined);
+         }}
+         message={loginMessage}
+         onLoginSuccess={handleLoginSuccess}
       />
     </nav>
   );

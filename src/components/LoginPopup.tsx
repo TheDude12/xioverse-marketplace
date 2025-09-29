@@ -10,14 +10,15 @@ interface LoginPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   message?: string;
+  onLoginSuccess?: () => void;
 }
 
-const LoginPopup: React.FC<LoginPopupProps> = ({ open, onOpenChange, message }) => {
+const LoginPopup: React.FC<LoginPopupProps> = ({ open, onOpenChange, message, onLoginSuccess }) => {
   const handleLogin = () => {
     // Simulate successful login
     console.log('Login successful - simulated for development');
+    onLoginSuccess?.(); // Call the success callback to update login state
     onOpenChange(false); // Close the popup
-    // For development purposes, we'll just close the modal to simulate login
   };
 
   const handleSocialLogin = (provider: string) => {
