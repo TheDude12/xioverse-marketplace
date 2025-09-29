@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, X } from 'lucide-react';
@@ -8,9 +8,11 @@ import LoginPopup from './LoginPopup';
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loginPopupOpen, setLoginPopupOpen] = useState(false);
   const [loginMessage, setLoginMessage] = useState<string | undefined>();
+  const [intendedDestination, setIntendedDestination] = useState<string | null>(null);
 
   // TODO: Replace with actual authentication state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,11 +32,17 @@ const Navigation = () => {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
+    // Navigate to intended destination after login
+    if (intendedDestination) {
+      navigate(intendedDestination);
+      setIntendedDestination(null);
+    }
   };
 
   const handleSellClick = (e: React.MouseEvent) => {
     if (!isLoggedIn) {
       e.preventDefault();
+      setIntendedDestination('/sell'); // Store the intended destination
       setLoginMessage("Please login to view your collection");
       setLoginPopupOpen(true);
     }
