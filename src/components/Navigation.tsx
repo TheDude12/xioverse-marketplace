@@ -31,6 +31,7 @@ const Navigation = () => {
   };
 
   const handleLoginSuccess = () => {
+    console.log('Setting isLoggedIn to true');
     setIsLoggedIn(true);
     // Navigate to intended destination after login
     if (intendedDestination) {
