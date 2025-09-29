@@ -2,7 +2,7 @@ import Navigation from '@/components/Navigation';
 
 const Overview = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/50 to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-black via-black to-black/95">
       <Navigation />
       <div className="container mx-auto px-4 py-16">        
         {/* Main Content Grid - Centered */}
