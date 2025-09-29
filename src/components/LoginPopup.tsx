@@ -13,20 +13,27 @@ interface LoginPopupProps {
 }
 
 const LoginPopup: React.FC<LoginPopupProps> = ({ open, onOpenChange, message }) => {
+  const handleLogin = () => {
+    // Simulate successful login
+    console.log('Login successful - simulated for development');
+    onOpenChange(false); // Close the popup
+    // For development purposes, we'll just close the modal to simulate login
+  };
+
   const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider} - to be implemented`);
-    // TODO: Implement social login
+    console.log(`Login with ${provider} - simulated for development`);
+    handleLogin();
   };
 
   const handleWalletLogin = () => {
-    console.log('Login with wallet - to be implemented');
-    // TODO: Implement Reown wallet login
+    console.log('Login with wallet - simulated for development');
+    handleLogin();
   };
 
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login with email - to be implemented');
-    // TODO: Implement email login
+    console.log('Login with email - simulated for development');
+    handleLogin();
   };
 
   return (
@@ -126,7 +133,7 @@ const LoginPopup: React.FC<LoginPopupProps> = ({ open, onOpenChange, message }) 
             <button
               type="button"
               className="text-primary hover:underline"
-              onClick={() => console.log('Sign up - to be implemented')}
+              onClick={handleLogin}
             >
               Sign up
             </button>

@@ -10,7 +10,7 @@ const Overview = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl">
             {/* Video Section - Left Side */}
             <div className="relative">
-              <div className="aspect-[9/16] bg-card border border-border/50 rounded-lg overflow-hidden shadow-2xl max-w-md mx-auto lg:mx-0">
+              <div className="aspect-[9/16] bg-card rounded-lg overflow-hidden shadow-2xl max-w-md mx-auto lg:mx-0">
                 <video 
                   className="w-full h-full object-cover"
                   controls
