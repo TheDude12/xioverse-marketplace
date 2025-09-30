@@ -92,7 +92,6 @@ const AssetOwnerDetail = () => {
   const [listingType, setListingType] = useState('sale');
   const [price, setPrice] = useState('');
   const [auctionPrice, setAuctionPrice] = useState('');
-  const [reservePrice, setReservePrice] = useState('');
   const [duration, setDuration] = useState('7');
 
   const asset = mockAssets.find(a => a.id === id);
@@ -376,23 +375,12 @@ const AssetOwnerDetail = () => {
               {(listingType === 'auction' || listingType === 'both') && (
                 <>
                   <div>
-                    <Label>Starting Bid (ETH)</Label>
+                    <Label>Minimum Bid (ETH)</Label>
                     <Input 
-                      placeholder="Enter starting bid..." 
+                      placeholder="Enter minimum bid..." 
                       value={auctionPrice}
                       onChange={(e) => setAuctionPrice(e.target.value)}
                     />
-                  </div>
-                  <div>
-                    <Label>Reserve Price (ETH) - Optional</Label>
-                    <Input 
-                      placeholder="Hidden minimum price..." 
-                      value={reservePrice}
-                      onChange={(e) => setReservePrice(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Reserve price is hidden from bidders. Auction fails if reserve not met.
-                    </p>
                   </div>
                   <div>
                     <Label>Duration (Days)</Label>
